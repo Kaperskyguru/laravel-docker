@@ -1,0 +1,30 @@
+version: "2"
+services:
+  app:
+    build: .
+    container_name: demo_app
+    ports:
+      - "8080:8000"
+    volumes:
+      - .:/var/www
+    env_file: .env
+    working_dir: /var/www
+    command: bash -c 'php artisan migrate && php artisan passport:install && php artisan serve --host 0.0.0.0'
+    depends_on:
+      - db
+    links:
+      - db
+  db:
+    image: "mysql:5.7"
+    container_name: app_db
+    restart: unless-stopped
+    tty: true
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    volumes:
+      - ./data/:/var/lib/mysql
+    expose:
+      - "3306"
